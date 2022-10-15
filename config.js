@@ -17,12 +17,24 @@ cfg.port = process.env.PORT || 3000;
 // variables, and load them from there as we are doing below. Alternately,
 // you could hard code these values here as strings.
 cfg.accountSid = process.env.TWILIO_ACCOUNT_SID;
+cfg.ieSecret = process.env.TWILIO_IE1_SECRET;
 
-cfg.twimlAppSid = process.env.TWILIO_TWIML_APP_SID;
 cfg.callerId = process.env.TWILIO_CALLER_ID;
 
-cfg.apiKey = process.env.TWILIO_API_KEY;
-cfg.apiSecret = process.env.TWILIO_API_SECRET;
+// US Region
+cfg.usTwimlAppSid = process.env.TWILIO_US_TWIML_APP_SID;
+cfg.usApiKey = process.env.TWILIO_US_API_KEY;
+cfg.usApiSecret = process.env.TWILIO_US_API_SECRET;
+
+// EU Region
+cfg.euTwimlAppSid = process.env.TWILIO_EU_TWIML_APP_SID;
+cfg.euApiKey = process.env.TWILIO_EU_API_KEY;
+cfg.euApiSecret = process.env.TWILIO_EU_API_SECRET;
+
+// AU
+cfg.auTwimlAppSid = process.env.TWILIO_AU_TWIML_APP_SID;
+cfg.auApiKey = process.env.TWILIO_AU_API_KEY;
+cfg.auApiSecret = process.env.TWILIO_AU_API_SECRET;
 
 // Export configuration object
 module.exports = cfg;

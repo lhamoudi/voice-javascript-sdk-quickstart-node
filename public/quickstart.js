@@ -5,6 +5,7 @@
   const inputVolumeBar = document.getElementById("input-volume");
   const volumeIndicators = document.getElementById("volume-indicators");
   const callButton = document.getElementById("button-call");
+  const callQueueButton = document.getElementById("button-call-queue");
   const outgoingCallHangupButton = document.getElementById("button-hangup-outgoing");
   const callControlsDiv = document.getElementById("call-controls");
   const audioSelectionDiv = document.getElementById("output-selection");
@@ -26,6 +27,7 @@
 
   let device;
   let token;
+  let region;
 
   // Event Listeners
 
@@ -33,6 +35,13 @@
     e.preventDefault();
     makeOutgoingCall();
   };
+
+  callQueueButton.onclick = (e) => {
+    e.preventDefault();
+    var queue = document.getElementById("queue").value;
+    makeOutgoingCallToQueue(queue);
+  };
+
   getAudioDevicesButton.onclick = getAudioDevices;
   speakerDevices.addEventListener("change", updateOutputDevice);
   ringtoneDevices.addEventListener("change", updateRingtoneDevice);
@@ -47,9 +56,13 @@
   async function startupClient() {
     log("Requesting Access Token...");
 
+    region = document.getElementById("region").value;
+    log(`Selected Region - ${region}`);
+
     try {
-      const data = await $.getJSON("/token");
-      log("Got a token.");
+      var region = document.getElementById("region");
+      const data = await $.getJSON(`/token?region=${region.value}`);
+      log(`Got a token. ${data.token}`);
       token = data.token;
       setClientNameUI(data.identity);
       intitializeDevice();
@@ -64,11 +77,25 @@
   function intitializeDevice() {
     logDiv.classList.remove("hide");
     log("Initializing device");
-    device = new Twilio.Device(token, {
-      logLevel:1,
+
+    if(device) {
+
+      device.destroy();
+    }
+
+    // specify edge
+    // var edge = region === "us1" ? ['ashburn']: ['dublin'];
+
+    device = new Twilio.Device(token, {edge: ['ashburn']});
+    
+    device.updateOptions( {
+      debug: true,
+      answerOnBridge: true,
       // Set Opus as our preferred codec. Opus generally performs better, requiring less bandwidth and
-      // providing better audio quality in restrained network conditions.
+      // providing better audio quality in restrained network conditions. Opus will be default in 2.0.
       codecPreferences: ["opus", "pcmu"],
+      //region: "ie1",
+      // edge: ['dublin', 'ashburn']
     });
 
     addDeviceListeners(device);
@@ -100,7 +127,6 @@
   }
 
   // MAKE AN OUTGOING CALL
-
   async function makeOutgoingCall() {
     var params = {
       // get the phone number to call from the DOM
@@ -108,7 +134,7 @@
     };
 
     if (device) {
-      log(`Attempting to call ${params.To} ...`);
+      log(`Attempting to call ${params.queue} ...`);
 
       // Twilio.Device.connect() returns a Call object
       const call = await device.connect({ params });
@@ -118,6 +144,33 @@
       call.on("accept", updateUIAcceptedOutgoingCall);
       call.on("disconnect", updateUIDisconnectedOutgoingCall);
       call.on("cancel", updateUIDisconnectedOutgoingCall);
+      call.on("reject", updateUIDisconnectedOutgoingCall);
+
+      outgoingCallHangupButton.onclick = () => {
+        log("Hanging up ...");
+        call.disconnect();
+      };
+
+    } else {
+      log("Unable to make call.");
+    }
+  }
+
+  async function makeOutgoingCallToQueue(queue) {
+    var params = {
+      queue: queue
+    };
+
+    if (device) {
+      log(`Attempting to call ${params.queue} ...`);
+      // Twilio.Device.connect() returns a Call object
+      const call = await device.connect({ params });
+      // add listeners to the Call
+      // "accepted" means the call has finished connecting and the state is now "open"
+      call.on("accept", updateUIAcceptedOutgoingCall);
+      call.on("disconnect", updateUIDisconnectedOutgoingCall);
+      call.on("cancel", updateUIDisconnectedOutgoingCall);
+      call.on("reject", updateUIDisconnectedOutgoingCall);
 
       outgoingCallHangupButton.onclick = () => {
         log("Hanging up ...");
@@ -138,7 +191,7 @@
   }
 
   function updateUIDisconnectedOutgoingCall() {
-    log("Call disconnected.");
+    log("Call disconnected...");
     callButton.disabled = false;
     outgoingCallHangupButton.classList.add("hide");
     volumeIndicators.classList.add("hide");

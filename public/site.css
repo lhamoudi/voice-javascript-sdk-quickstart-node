@@ -40,6 +40,26 @@ main {
   align-items: flex-start;
 }
 
+.select {
+  user-select: none;
+  box-sizing: border-box;
+  position: relative;
+  border-radius: 4px;
+  border-style: solid;
+  border-width: 1px;
+  border-color: gray;
+  height: 30px;
+  display: inline-block;
+}
+
+.center {
+  margin: auto;
+  width: 20%;
+  padding: 10px;
+  text-align: center;
+}
+
+
 .left-column,
 .center-column,
 .right-column {
