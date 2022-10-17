@@ -17,7 +17,12 @@ cfg.port = process.env.PORT || 3000;
 // variables, and load them from there as we are doing below. Alternately,
 // you could hard code these values here as strings.
 cfg.accountSid = process.env.TWILIO_ACCOUNT_SID;
-cfg.ieSecret = process.env.TWILIO_IE1_SECRET;
+cfg.secret = process.env.TWILIO_SECRET;
+
+
+// Region and Edge
+cfg.region = process.env.TWILIO_REGION;
+cfg.edge = process.env.TWILIO_EDGE;
 
 cfg.callerId = process.env.TWILIO_CALLER_ID;
 

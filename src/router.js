@@ -1,5 +1,5 @@
 const Router = require("express").Router;
-const { tokenGenerator, voiceResponse, menuResponse, connectResponse } = require("./handler");
+const { tokenGenerator, voiceResponse, menuResponse, connectResponse, outboundResponse, dialerResponse } = require("./handler");
 const twilioCaller = require('./lib/twilio-helpers');
 const url = require('url');
 const AGENT_WAIT_URL = 'http://twimlets.com/holdmusic?Bucket=com.twilio.music.classical';
@@ -19,6 +19,17 @@ router.post("/voice", (req, res) => {
   res.send(voiceResponse(req.body));
 });
 
+router.post("/dial", (req, res) => {
+  res.set("Content-Type", "text/xml");
+  dialerResponse(req);
+  res.sendStatus(200);
+});
+
+router.post("/outbound", async (req, res) => {
+  res.set("Content-Type", "text/xml");
+  res.send(await outboundResponse(req));
+});
+
 router.post("/menu", (req, res) => {
   res.set("Content-Type", "text/xml");
   res.send(menuResponse(req.body));
@@ -31,7 +42,7 @@ router.post("/connect", (req, res) => {
   , agentOne = "agent1"
   , callbackUrl = connectConferenceUrl(req, agentOne, conferenceId);
 
- twilioCaller.call(agentOne, callbackUrl)
+ twilioCaller.callClient(agentOne, callbackUrl)
   .then(function(doc) {
     res.type('text/xml');
     res.send( twilioCaller.connectConferenceTwiml({

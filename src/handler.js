@@ -6,6 +6,7 @@ const VoiceGrant = AccessToken.VoiceGrant;
 
 const nameGenerator = require("../name_generator");
 const config = require("../config");
+const { response } = require("express");
 
 let identity;
 
@@ -13,7 +14,7 @@ const AGENT_WAIT_URL =
   "http://twimlets.com/holdmusic?Bucket=com.twilio.music.classical";
 
 exports.tokenGenerator = function tokenGenerator(region) {
-  identity = "agent1"; 
+  identity = "agent1";
 
   let apiKey;
   let secret;
@@ -21,20 +22,24 @@ exports.tokenGenerator = function tokenGenerator(region) {
 
   console.log(region);
 
-  if (region === "us1") {
-    apiKey = config.usApiKey;
-    secret = config.usApiSecret;
-    twimlAppSid = config.usTwimlAppSid;
-  } else {
+  if (region === "ie1") {
     apiKey = config.euApiKey;
     secret = config.euApiSecret;
     twimlAppSid = config.euTwimlAppSid;
+  } else if (region === "au1") {
+    apiKey = config.auApiKey;
+    secret = config.auApiSecret;
+    twimlAppSid = config.auTwimlAppSid;
+  } else {
+    apiKey = config.usApiKey;
+    secret = config.usApiSecret;
+    twimlAppSid = config.usTwimlAppSid;
   }
 
-  const accessToken = new AccessToken(config.accountSid, apiKey, secret);
-  // !!! important !!! //
-  accessToken.region = region;
-  
+  const accessToken = new AccessToken(config.accountSid, apiKey, secret, {
+    region: region,
+  });
+
   accessToken.identity = identity;
   const grant = new VoiceGrant({
     outgoingApplicationSid: twimlAppSid,
@@ -47,6 +52,49 @@ exports.tokenGenerator = function tokenGenerator(region) {
     identity: identity,
     token: accessToken.toJwt(),
   };
+};
+
+exports.outboundResponse = async (req) => {
+  //res.set("Content-Type", "text/xml");]]
+
+  console.log(req.body.AnsweredBy);
+
+
+  if (req.body.AnsweredBy === "human") {
+
+    
+
+    var conferenceId = req.body.CallSid,
+      agentOne = "agent1",
+      callbackUrl = connectConferenceUrl(req, agentOne, conferenceId);
+
+    await twilioCaller.callClient(agentOne, callbackUrl);
+
+    return await twilioCaller
+      .connectConferenceTwiml({
+        conferenceId: conferenceId,
+        waitUrl: AGENT_WAIT_URL,
+        startConferenceOnEnter: false,
+        endConferenceOnExit: true,
+      })
+      .toString();
+  } else {
+    let twiml = new VoiceResponse();
+    twiml.hangup();
+    return twiml.toString();
+  }
+};
+
+exports.dialerResponse = async (req) => {
+  const phoneNumber = req.body.phone;
+  console.log(`calling ${phoneNumber}`);
+  var pathName = `/outbound`;
+  const callbackUrl = url.format({
+    protocol: "https",
+    host: req.get("host"),
+    pathname: pathName,
+  });
+  await twilioCaller.call(phoneNumber, "https://08c8-70-88-229-49.ngrok.io/outbound");
 };
 
 exports.voiceResponse = function voiceResponse(requestBody) {

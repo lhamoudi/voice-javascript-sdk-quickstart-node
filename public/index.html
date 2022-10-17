@@ -14,8 +14,9 @@
           <legend>Region</legend>
              <div>
               <select name="region" id="region" class="select">
-                <option value="us1">United States</option>
+                <option value="au1">Australia</option>
                 <option value="ie1">Ireland</option>
+                <option value="us1">United States</option>
               </select>
               <button id="startup-button">Start up the Device</button></div>  
           </fieldset>
@@ -40,10 +41,8 @@
         <h2 class="instructions">Make a Call</h2>
         <div id="call-controls" class="hide">
           <form>
-            <label for="phone-number"
-              >Enter a phone number or client name</label
-            >
-            <input id="phone-number" type="text" placeholder="+15552221234" value="+14434336497"></input>
+            <label for="phone-number">Enter a phone number or client name</label>
+            <input id="phone-number" type="text" placeholder="+15552221234"></input>
             <button id="button-call" type="submit">Call</button>
           </form>
           <form>
@@ -53,6 +52,13 @@
                 <option value="support">Support</option>
               </select>
               <button id="button-call-queue">Call Queue</button>
+            </div>  
+          </form>
+          <form>
+            <div>
+              <label for="phone-number-outbound">Enter a phone number</label>
+            <input id="phone-number-outbound" type="text" placeholder="+15552221234"></input>
+            <button id="button-call-outbound" type="submit">Outbound Call (with AMD check)</button>
             </div>  
           </form>
           <button id="button-hangup-outgoing" class="hide">Hang Up</button>

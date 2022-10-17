@@ -6,6 +6,7 @@
   const volumeIndicators = document.getElementById("volume-indicators");
   const callButton = document.getElementById("button-call");
   const callQueueButton = document.getElementById("button-call-queue");
+  const callOutboundButton = document.getElementById("button-call-outbound");
   const outgoingCallHangupButton = document.getElementById("button-hangup-outgoing");
   const callControlsDiv = document.getElementById("call-controls");
   const audioSelectionDiv = document.getElementById("output-selection");
@@ -22,6 +23,7 @@
     "button-reject-incoming"
   );
   const phoneNumberInput = document.getElementById("phone-number");
+  const phoneNumberOutboundInput = document.getElementById("phone-number-outbound");
   const incomingPhoneNumberEl = document.getElementById("incoming-number");
   const startupButton = document.getElementById("startup-button");
 
@@ -41,6 +43,13 @@
     var queue = document.getElementById("queue").value;
     makeOutgoingCallToQueue(queue);
   };
+
+  callOutboundButton.onclick = (e) => {
+    e.preventDefault();
+    var number = phoneNumberOutboundInput.value;
+    makeOutboundCall(number);
+  };
+
 
   getAudioDevicesButton.onclick = getAudioDevices;
   speakerDevices.addEventListener("change", updateOutputDevice);
@@ -134,7 +143,7 @@
     };
 
     if (device) {
-      log(`Attempting to call ${params.queue} ...`);
+      log(`Attempting to call ${params.To} ...`);
 
       // Twilio.Device.connect() returns a Call object
       const call = await device.connect({ params });
@@ -155,6 +164,26 @@
       log("Unable to make call.");
     }
   }
+
+
+  async function makeOutboundCall(phoneNumber) {
+      log(`Outbound Call to ${phoneNumber}`);
+  
+      try {
+       // const data = await $.getJSON(`/dialer?number=${phoneNumber}`);
+
+        $.ajax({
+          type: 'POST',
+          url: '/dial',
+          data: JSON.stringify ({phone: phoneNumber}),
+          contentType: "application/json",
+          dataType: 'json'
+      });
+      } catch (err) {
+        console.log(err);
+        log("An error occurred. See your browser console for more information.");
+      }
+    }
 
   async function makeOutgoingCallToQueue(queue) {
     var params = {
