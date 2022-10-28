@@ -29,7 +29,7 @@
 
   let device;
   let token;
-  let region;
+  let device2;
 
   // Event Listeners
 
@@ -79,6 +79,19 @@
       console.log(err);
       log("An error occurred. See your browser console for more information.");
     }
+
+    // Initialize a second device
+    // try {
+    //   var region = document.getElementById("region");
+    //   const data = await $.getJSON(`/token?region=us1`);
+    //   log(`Got a token. ${data.token}`);
+    //   token = data.token;
+    //   //setClientNameUI(data.identity);
+    //   intitializeDevice2();
+    // } catch (err) {
+    //   console.log(err);
+    //   log("An error occurred. See your browser console for more information.");
+    // }
   }
 
   // SETUP STEP 3:
@@ -112,6 +125,34 @@
     // Device must be registered in order to receive incoming calls
     device.register();
   }
+
+
+  // function intitializeDevice2() {
+  //   log("Initializing device 2");
+
+  //   if(device2) {
+
+  //     device2.destroy();
+  //   }
+
+  //   // specify edge
+  //   // var edge = region === "us1" ? ['ashburn']: ['dublin'];
+
+  //   device2 = new Twilio.Device(token, {edge: ['ashburn']});
+    
+  //   device2.updateOptions( {
+  //     debug: true,
+  //     answerOnBridge: true,
+  //     // Set Opus as our preferred codec. Opus generally performs better, requiring less bandwidth and
+  //     // providing better audio quality in restrained network conditions. Opus will be default in 2.0.
+  //     codecPreferences: ["opus", "pcmu"],
+  //   });
+
+  //   addDeviceListeners(device2);
+
+  //   // Device must be registered in order to receive incoming calls
+  //  // device2.register();
+  // }
 
   // SETUP STEP 4:
   // Listen for Twilio.Device states
@@ -192,10 +233,7 @@
 
     if (device) {
       log(`Attempting to call ${params.queue} ...`);
-      // Twilio.Device.connect() returns a Call object
       const call = await device.connect({ params });
-      // add listeners to the Call
-      // "accepted" means the call has finished connecting and the state is now "open"
       call.on("accept", updateUIAcceptedOutgoingCall);
       call.on("disconnect", updateUIDisconnectedOutgoingCall);
       call.on("cancel", updateUIDisconnectedOutgoingCall);

@@ -36,6 +36,7 @@ exports.tokenGenerator = function tokenGenerator(region) {
     twimlAppSid = config.usTwimlAppSid;
   }
 
+  // note: apiKey and secret are region specfic
   const accessToken = new AccessToken(config.accountSid, apiKey, secret, {
     region: region,
   });
@@ -47,6 +48,7 @@ exports.tokenGenerator = function tokenGenerator(region) {
   });
   accessToken.addGrant(grant);
 
+
   // Include identity and token in a JSON response
   return {
     identity: identity,
@@ -55,15 +57,10 @@ exports.tokenGenerator = function tokenGenerator(region) {
 };
 
 exports.outboundResponse = async (req) => {
-  //res.set("Content-Type", "text/xml");]]
 
   console.log(req.body.AnsweredBy);
 
-
-  if (req.body.AnsweredBy === "human") {
-
-    
-
+  if (req.body.AnsweredBy === "human" || req.body.AnsweredBy === "unknown") {
     var conferenceId = req.body.CallSid,
       agentOne = "agent1",
       callbackUrl = connectConferenceUrl(req, agentOne, conferenceId);
@@ -94,7 +91,7 @@ exports.dialerResponse = async (req) => {
     host: req.get("host"),
     pathname: pathName,
   });
-  await twilioCaller.call(phoneNumber, "https://08c8-70-88-229-49.ngrok.io/outbound");
+  await twilioCaller.call(phoneNumber, `${config.serviceUrl}/outbound`);
 };
 
 exports.voiceResponse = function voiceResponse(requestBody) {
@@ -107,6 +104,7 @@ exports.voiceResponse = function voiceResponse(requestBody) {
   // then it is an incoming call towards your Twilio.Device.
   if (toNumberOrClientName == callerId) {
     //const twiml = new VoiceResponse();
+   
     const gather = twiml.gather({
       action: "/menu",
       numDigits: "1",
@@ -136,10 +134,10 @@ exports.voiceResponse = function voiceResponse(requestBody) {
   } else if (requestBody.queue) {
     const dial = twiml.dial();
     dial.queue(
-      {
-        action: "https://webhook.site/bd2e8408-32b0-4956-8fce-496bf337ed79",
-        method: "POST",
-      },
+      // {
+      //   action: "https://webhook.site/xxx",
+      //   method: "POST",
+      // },
       requestBody.queue
     );
   } else {

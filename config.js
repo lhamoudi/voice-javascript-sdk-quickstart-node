@@ -36,10 +36,13 @@ cfg.euTwimlAppSid = process.env.TWILIO_EU_TWIML_APP_SID;
 cfg.euApiKey = process.env.TWILIO_EU_API_KEY;
 cfg.euApiSecret = process.env.TWILIO_EU_API_SECRET;
 
-// AU
+// AU Region
 cfg.auTwimlAppSid = process.env.TWILIO_AU_TWIML_APP_SID;
 cfg.auApiKey = process.env.TWILIO_AU_API_KEY;
 cfg.auApiSecret = process.env.TWILIO_AU_API_SECRET;
+
+// Service Url
+cfg.serviceUrl = process.env.SERVICE_URL;
 
 // Export configuration object
 module.exports = cfg;
