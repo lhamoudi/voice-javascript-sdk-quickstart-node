@@ -19,7 +19,6 @@ cfg.port = process.env.PORT || 3000;
 cfg.accountSid = process.env.TWILIO_ACCOUNT_SID;
 cfg.secret = process.env.TWILIO_SECRET;
 
-
 // Region and Edge
 cfg.region = process.env.TWILIO_REGION;
 cfg.edge = process.env.TWILIO_EDGE;

@@ -1,11 +1,11 @@
 const VoiceResponse = require("twilio").twiml.VoiceResponse;
 const AccessToken = require("twilio").jwt.AccessToken;
-const twilioCaller = require("./lib/twilio-helpers");
+//const twilioCaller = require("./lib/twilio-helpers");
 const url = require("url");
 const VoiceGrant = AccessToken.VoiceGrant;
 
 const nameGenerator = require("../name_generator");
-const config = require("../config");
+const config = require("./config");
 const { response } = require("express");
 
 let identity;
@@ -47,7 +47,6 @@ exports.tokenGenerator = function tokenGenerator(region) {
     incomingAllow: true,
   });
   accessToken.addGrant(grant);
-
 
   // Include identity and token in a JSON response
   return {
@@ -100,11 +99,15 @@ exports.voiceResponse = function voiceResponse(requestBody) {
     dial[attr]({}, toNumberOrClientName);
   } else if (requestBody.queueName) {
     // This is an agent joining the queue
-    console.log(`Dialing into queue ${requestBody.queueName}`);
+    console.log(
+      `Dialing into queue ${requestBody.queueName} with timeout ${requestBody.queueTimeout}`
+    );
 
     // 10 minute timeout. After which the agent will be removed from the queue
-    const dial = twiml.dial({ timeout: 600 });
+
+    const dial = twiml.dial({ timeout: requestBody.queueTimeout });
     dial.queue(requestBody.queueName);
+    console.log(twiml.toString());
   } else {
     twiml.say("Thanks for calling!");
   }

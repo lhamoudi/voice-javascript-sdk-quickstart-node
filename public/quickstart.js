@@ -6,6 +6,11 @@
   const volumeIndicators = document.getElementById("volume-indicators");
   const callButton = document.getElementById("button-call");
   const callQueueButton = document.getElementById("button-call-queue");
+  const callQueueTimer = document.getElementById("queue-timer");
+  const callQueueTimerCountdownMessage = document.getElementById(
+    "queue-timer-countdown-message"
+  );
+
   //const callOutboundButton = document.getElementById("button-call-outbound");
   const outgoingCallHangupButton = document.getElementById(
     "button-hangup-outgoing"
@@ -28,15 +33,17 @@
     "button-reject-incoming"
   );
   const phoneNumberInput = document.getElementById("phone-number");
-  const phoneNumberOutboundInput = document.getElementById(
-    "phone-number-outbound"
-  );
+  const queueInput = document.getElementById("queue");
+  //  const phoneNumberOutboundInput = document.getElementById(
+  //    "phone-number-outbound"
+  //  );
   const incomingPhoneNumberEl = document.getElementById("incoming-number");
   const startupButton = document.getElementById("startup-button");
 
   let device;
   let token;
-  let device2;
+  //let device2;
+  let queueTimer;
 
   // Event Listeners
 
@@ -47,8 +54,10 @@
 
   callQueueButton.onclick = (e) => {
     e.preventDefault();
-    var queue = document.getElementById("queue").value;
-    makeOutgoingCallToQueue(queue);
+    var queue = queueInput.value;
+    // Max timout for <Dial><Queue> is 600 seconds
+    var queueTimeout = 600;
+    makeOutgoingCallToQueue(queue, queueTimeout);
   };
 
   /*
@@ -230,14 +239,16 @@
     }
 */
 
-  async function makeOutgoingCallToQueue(queue) {
+  async function makeOutgoingCallToQueue(queue, queueTimeout) {
     var params = {
       queueName: queue,
+      queueTimeout,
     };
 
     if (device) {
       log(`Attempting to call queue: ${params.queueName} ...`);
       const call = await device.connect({ params });
+      updateUIAttemptedOutgoingQueueCall(call, queueTimeout);
       call.on("accept", updateUIAcceptedOutgoingQueueCall);
       call.on("disconnect", updateUIDisconnectedOutgoingQueueCall);
       call.on("cancel", updateUIDisconnectedOutgoingQueueCall);
@@ -266,10 +277,25 @@
     volumeIndicators.classList.add("hide");
   }
 
+  function updateUIAttemptedOutgoingQueueCall(call, queueTimeout) {
+    log("Queue call attempted ...");
+    callQueueButton.disabled = true;
+    queueInput.disabled = true;
+    outgoingQueueCallHangupButton.classList.remove("hide");
+    outgoingQueueCallHangupButton.innerHTML = "Leave Queue";
+    queueTimerCountdown(callQueueTimerCountdownMessage, queueTimeout);
+    callQueueTimer.classList.remove("hide");
+    volumeIndicators.classList.remove("hide");
+    bindVolumeIndicators(call);
+  }
+
   function updateUIAcceptedOutgoingQueueCall(call) {
     log("Queue call in progress ...");
     callQueueButton.disabled = true;
+    queueInput.disabled = true;
     outgoingQueueCallHangupButton.classList.remove("hide");
+    outgoingQueueCallHangupButton.innerHTML = "Hangup";
+    callQueueTimer.classList.add("hide");
     volumeIndicators.classList.remove("hide");
     bindVolumeIndicators(call);
   }
@@ -277,8 +303,44 @@
   function updateUIDisconnectedOutgoingQueueCall() {
     log("Queue call disconnected...");
     callQueueButton.disabled = false;
+    queueInput.disabled = false;
     outgoingQueueCallHangupButton.classList.add("hide");
+    callQueueTimer.classList.add("hide");
     volumeIndicators.classList.add("hide");
+  }
+
+  function queueTimerCountdown(element, seconds) {
+    var endTime, hours, mins, msLeft, time;
+
+    // Clear any existing timer
+    if (queueTimer) {
+      clearTimeout(queueTimer);
+      queueTimer = null;
+    }
+
+    function twoDigits(n) {
+      return n <= 9 ? "0" + n : n;
+    }
+
+    function updateTimer() {
+      msLeft = endTime - +new Date();
+      if (msLeft < 1000) {
+        element.innerHTML = "Disconnecting!";
+      } else {
+        time = new Date(msLeft);
+        hours = time.getUTCHours();
+        mins = time.getUTCMinutes();
+        element.innerHTML =
+          "Disconnecting in " +
+          (hours ? hours + ":" + twoDigits(mins) : mins) +
+          ":" +
+          twoDigits(time.getUTCSeconds());
+        queueTimer = setTimeout(updateTimer, time.getUTCMilliseconds() + 500);
+      }
+    }
+
+    endTime = +new Date() + 1000 * seconds + 500;
+    updateTimer();
   }
 
   // HANDLE INCOMING CALL

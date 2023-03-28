@@ -1,6 +1,6 @@
 "use strict";
 var VoiceResponse = require("twilio").twiml.VoiceResponse;
-const config = require("../../config");
+const config = require("../config");
 
 var callClient = async function (agentId, callbackUrl) {
   var twilioPhoneNumber = process.env.TWILIO_CALLER_ID;
