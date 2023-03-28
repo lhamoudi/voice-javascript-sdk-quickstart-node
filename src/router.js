@@ -1,5 +1,13 @@
 const Router = require("express").Router;
-const { tokenGenerator, voiceResponse, menuResponse, connectResponse, outboundResponse, dialerResponse } = require("./handler");
+const {
+  tokenGenerator,
+  voiceResponse,
+  menuResponse,
+  connectResponse,
+  outboundResponse,
+  dialerResponse,
+  queueChoiceResponse,
+} = require("./handler");
 const twilioCaller = require('./lib/twilio-helpers');
 const url = require('url');
 const AGENT_WAIT_URL = 'http://twimlets.com/holdmusic?Bucket=com.twilio.music.classical';
@@ -14,27 +22,55 @@ router.get("/token", (req, res) => {
   res.send(tokenGenerator(req.query.region));
 });
 
+/**
+ * Handles an incoming call attempt to the Twilio Phone Number - either from PSTN (i.e. an inbound call)
+ * or from the Voice Client (i.e. an outbound call). Also handles agent dialing into a voice queue (in order
+ * to be connected with inbound callers).
+ * 
+ * Returns TwiML to Programmable Voice.
+ */
 router.post("/voice", (req, res) => {
   res.set("Content-Type", "text/xml");
   res.send(voiceResponse(req.body));
 });
 
+/**
+ * Handles selection of a queue from the IVR menu options
+ * 
+ * Returns TwiML to Programmable Voice.
+ */
+router.post("/queue-choice", (req, res) => {
+  res.set("Content-Type", "text/xml");
+  res.send(queueChoiceResponse(req.body));
+});
+
+/**
+ * Handles outbound call creation - via the REST API
+ * 
+ * Not TwiML related
+ */
 router.post("/dial", (req, res) => {
   res.set("Content-Type", "text/xml");
   dialerResponse(req);
   res.sendStatus(200);
 });
 
+/**
+ * Handles the TwiML to be executed when an outbound call is answered
+ * 
+ * Returns TwiML to Programmable Voice
+ */
 router.post("/outbound", async (req, res) => {
   res.set("Content-Type", "text/xml");
   res.send(await outboundResponse(req));
 });
 
-router.post("/menu", (req, res) => {
-  res.set("Content-Type", "text/xml");
-  res.send(menuResponse(req.body));
-});
 
+
+// The below commented stuff is for unfinished conference functionality. We're using just voice queues for now.
+
+
+/*
 router.post("/connect", (req, res) => {
   res.set("Content-Type", "text/xml");
 
@@ -74,5 +110,6 @@ router.post('/conference/:conferenceId/connect/:agentId', function (req, res) {
   })
   .toString());
 });
+*/
 
 module.exports = router;

@@ -6,8 +6,13 @@
   const volumeIndicators = document.getElementById("volume-indicators");
   const callButton = document.getElementById("button-call");
   const callQueueButton = document.getElementById("button-call-queue");
-  const callOutboundButton = document.getElementById("button-call-outbound");
-  const outgoingCallHangupButton = document.getElementById("button-hangup-outgoing");
+  //const callOutboundButton = document.getElementById("button-call-outbound");
+  const outgoingCallHangupButton = document.getElementById(
+    "button-hangup-outgoing"
+  );
+  const outgoingQueueCallHangupButton = document.getElementById(
+    "button-hangup-queue"
+  );
   const callControlsDiv = document.getElementById("call-controls");
   const audioSelectionDiv = document.getElementById("output-selection");
   const getAudioDevicesButton = document.getElementById("get-devices");
@@ -23,7 +28,9 @@
     "button-reject-incoming"
   );
   const phoneNumberInput = document.getElementById("phone-number");
-  const phoneNumberOutboundInput = document.getElementById("phone-number-outbound");
+  const phoneNumberOutboundInput = document.getElementById(
+    "phone-number-outbound"
+  );
   const incomingPhoneNumberEl = document.getElementById("incoming-number");
   const startupButton = document.getElementById("startup-button");
 
@@ -44,17 +51,16 @@
     makeOutgoingCallToQueue(queue);
   };
 
+  /*
   callOutboundButton.onclick = (e) => {
     e.preventDefault();
     var number = phoneNumberOutboundInput.value;
     makeOutboundCall(number);
   };
-
-
+*/
   getAudioDevicesButton.onclick = getAudioDevices;
   speakerDevices.addEventListener("change", updateOutputDevice);
   ringtoneDevices.addEventListener("change", updateRingtoneDevice);
-  
 
   // SETUP STEP 1:
   // Browser client should be started after a user gesture
@@ -100,17 +106,16 @@
     logDiv.classList.remove("hide");
     log("Initializing device");
 
-    if(device) {
-
+    if (device) {
       device.destroy();
     }
 
     // specify edge
     // var edge = region === "us1" ? ['ashburn']: ['dublin'];
 
-    device = new Twilio.Device(token, {edge: ['ashburn']});
-    
-    device.updateOptions( {
+    device = new Twilio.Device(token, { edge: ["ashburn"] });
+
+    device.updateOptions({
       debug: true,
       answerOnBridge: true,
       // Set Opus as our preferred codec. Opus generally performs better, requiring less bandwidth and
@@ -126,7 +131,6 @@
     device.register();
   }
 
-
   // function intitializeDevice2() {
   //   log("Initializing device 2");
 
@@ -139,7 +143,7 @@
   //   // var edge = region === "us1" ? ['ashburn']: ['dublin'];
 
   //   device2 = new Twilio.Device(token, {edge: ['ashburn']});
-    
+
   //   device2.updateOptions( {
   //     debug: true,
   //     answerOnBridge: true,
@@ -200,13 +204,12 @@
         log("Hanging up ...");
         call.disconnect();
       };
-
     } else {
       log("Unable to make call.");
     }
   }
 
-
+  /*
   async function makeOutboundCall(phoneNumber) {
       log(`Outbound Call to ${phoneNumber}`);
   
@@ -225,27 +228,26 @@
         log("An error occurred. See your browser console for more information.");
       }
     }
+*/
 
   async function makeOutgoingCallToQueue(queue) {
     var params = {
-      queue: queue
+      queueName: queue,
     };
 
     if (device) {
-      log(`Attempting to call ${params.queue} ...`);
+      log(`Attempting to call queue: ${params.queueName} ...`);
       const call = await device.connect({ params });
-      call.on("accept", updateUIAcceptedOutgoingCall);
-      call.on("disconnect", updateUIDisconnectedOutgoingCall);
-      call.on("cancel", updateUIDisconnectedOutgoingCall);
-      call.on("reject", updateUIDisconnectedOutgoingCall);
-
-      outgoingCallHangupButton.onclick = () => {
-        log("Hanging up ...");
+      call.on("accept", updateUIAcceptedOutgoingQueueCall);
+      call.on("disconnect", updateUIDisconnectedOutgoingQueueCall);
+      call.on("cancel", updateUIDisconnectedOutgoingQueueCall);
+      call.on("reject", updateUIDisconnectedOutgoingQueueCall);
+      outgoingQueueCallHangupButton.onclick = () => {
+        log("Hanging up queue call...");
         call.disconnect();
       };
-
     } else {
-      log("Unable to make call.");
+      log("Unable to make queue call.");
     }
   }
 
@@ -261,6 +263,21 @@
     log("Call disconnected...");
     callButton.disabled = false;
     outgoingCallHangupButton.classList.add("hide");
+    volumeIndicators.classList.add("hide");
+  }
+
+  function updateUIAcceptedOutgoingQueueCall(call) {
+    log("Queue call in progress ...");
+    callQueueButton.disabled = true;
+    outgoingQueueCallHangupButton.classList.remove("hide");
+    volumeIndicators.classList.remove("hide");
+    bindVolumeIndicators(call);
+  }
+
+  function updateUIDisconnectedOutgoingQueueCall() {
+    log("Queue call disconnected...");
+    callQueueButton.disabled = false;
+    outgoingQueueCallHangupButton.classList.add("hide");
     volumeIndicators.classList.add("hide");
   }
 
