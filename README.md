@@ -5,7 +5,7 @@
 
 # Customizations to the Twilio Voice JavaScript SDK Quickstart for Node.js
 
-Below is the *original* README.md file from the [Twilio Voice JavaScript SDK Quickstart for Node.js repository](https://github.com/TwilioDevEd/voice-javascript-sdk-quickstart-node). This repo is a customization to support the following added features:
+This repo is a customization of [Twilio Voice JavaScript SDK Quickstart for Node.js](https://github.com/TwilioDevEd/voice-javascript-sdk-quickstart-node) to support the following added features:
 
 * Region Selection
 * Join/Leave Voice Queue
@@ -72,7 +72,10 @@ Refer to [Set a phone number's inbound processing Region using the REST API](htt
   * For 3+ participant calls (e.g. warm transfers) - this could be done also when an enqueued call is bridged to a queued voice client (similar to what Flex/Taskrouter does upon task acceptance). i.e. execute `<Dial><Conference>` on the customer call SID first, then `<Dial>` in the voice client via a new call. 
  
 
-# Twilio Voice JavaScript SDK Quickstart for Node.js
+
+# Original README for Twilio Voice JavaScript SDK Quickstart for Node.js
+
+**Below is the *original* README.md file from the [Twilio Voice JavaScript SDK Quickstart for Node.js repository](https://github.com/TwilioDevEd/voice-javascript-sdk-quickstart-node). There may be some configuration items that are superceded by the regional configuration items above.**
 
 ![](https://github.com/TwilioDevEd/voice-javascript-sdk-quickstart-node/workflows/Node.js/badge.svg)
 
