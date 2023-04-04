@@ -74,9 +74,9 @@ exports.voiceResponse = function voiceResponse(requestBody) {
     });
     gather.say(
       { voice: "alice", loop: "3" },
-      "To connect to Support, press 1. " +
-        "To connect to Sales, press 2.  " +
-        "For all other enquires, press 3. "
+      "To connect to Support Queue, press 1. " +
+        "To connect to Sales Queue, press 2.  " +
+        "For all other enquiries, press 3. "
     );
 
     // let dial = twiml.dial();

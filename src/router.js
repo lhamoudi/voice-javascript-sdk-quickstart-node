@@ -8,7 +8,7 @@ const {
   dialerResponse,
   queueChoiceResponse,
 } = require("./handler");
-const twilioCaller = require('./lib/twilio-helpers');
+//const twilioCaller = require('./lib/twilio-helpers');
 const url = require('url');
 const AGENT_WAIT_URL = 'http://twimlets.com/holdmusic?Bucket=com.twilio.music.classical';
 const router = new Router();

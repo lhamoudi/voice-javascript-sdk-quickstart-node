@@ -1,6 +1,10 @@
+// This is experimental code used to connect a call to a conference
+
+/*
 "use strict";
 var VoiceResponse = require("twilio").twiml.VoiceResponse;
 const config = require("../config");
+
 
 var callClient = async function (agentId, callbackUrl) {
   var twilioPhoneNumber = process.env.TWILIO_CALLER_ID;
@@ -64,3 +68,4 @@ module.exports.waitResponseTwiml = waitResponseTwiml;
 module.exports.connectConferenceTwiml = connectConferenceTwiml;
 module.exports.callClient = callClient;
 module.exports.call = call;
+*/

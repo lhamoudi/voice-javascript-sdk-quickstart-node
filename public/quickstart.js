@@ -55,7 +55,7 @@
   callQueueButton.onclick = (e) => {
     e.preventDefault();
     var queue = queueInput.value;
-    // Max timout for <Dial><Queue> is 600 seconds
+    // Max timeout for <Dial><Queue> is 600 seconds
     var queueTimeout = 600;
     makeOutgoingCallToQueue(queue, queueTimeout);
   };

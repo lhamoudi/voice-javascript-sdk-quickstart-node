@@ -2,6 +2,76 @@
   <img src="https://static0.twilio.com/marketing/bundles/marketing/img/logos/wordmark-red.svg" alt="Twilio" width="250" />
 </a>
 
+
+# Customizations to the Twilio Voice JavaScript SDK Quickstart for Node.js
+
+Below is the *original* README.md file from the [Twilio Voice JavaScript SDK Quickstart for Node.js repository](https://github.com/TwilioDevEd/voice-javascript-sdk-quickstart-node). This repo is a customization to support the following added features:
+
+* Region Selection
+* Join/Leave Voice Queue
+* Basic IVR Menu for Queue Selection
+
+## Custom Setup
+
+### `.env`
+You will need to update the `.env` file with the `TWILIO_<region>_TWIML_[APP_SID|API_KEY|SECRET]`values for each region you want to support. For example, if you only want to support the default US region, you will need to add the following to your `.env` file:
+
+```bash
+TWILIO_US_TWIML_APP_SID=APXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+TWILIO_US_API_KEY=SKXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+TWILIO_US_API_SECRET=XXXXXXXXXXXXXXXXX
+```
+This is in addition to the standard `TWILIO_ACCOUNT_SID`and `TWILIO_CALLER_ID` values. No need to set `TWILIO_SECRET` (aka auth token), as it's only used by commented-out code relating to unfinished conference logic. 
+
+A TwiML App SID is needed for the `outgoingApplicationSid` in the Voice Grant - and will be invoked for outbound calls from the Voice Client. The API Key and Secret are needed to create an Access Token. See [Create an Access Token for Voice](https://www.twilio.com/docs/iam/access-tokens#create-an-access-token-for-voice). TwiML Apps and API Keys only exist in the Twilio Region in which they are defined, and as such  we need to define them for each region we want to support. See [Using the Twilio REST API in a non-US Region](https://www.twilio.com/docs/global-infrastructure/using-the-twilio-rest-api-in-a-non-us-region#region-specific-authentication-credentials).
+
+
+### `public/quickstart.js`
+
+In `public\quickstart.js` you may want to update the `queueTimeout` variable.
+
+```javascript
+  callQueueButton.onclick = (e) => {
+    e.preventDefault();
+    var queue = queueInput.value;
+    // Max timeout for <Dial><Queue> is 600 seconds
+    var queueTimeout = 600;
+    makeOutgoingCallToQueue(queue, queueTimeout);
+  };
+```
+
+Once agent (aka voice client) is dialed into the voice queue, Programmable Voice will wait for a configurable [timeout](https://www.twilio.com/docs/voice/twiml/dial#timeout) (default 30s), before disconnecting. We opted for the maximum timeout of 600s here, but you may want to adjust this value to suit your needs. 
+
+### Twilio Phone Number Regional Configuration
+When viewing products via the [Console](https://console.twilio.com/develop/explore), use the arrow to pin the region that you need. This will give you an area in Console exclusively containing that region’s pinned products - allowing you to segregate all things US1 from say IE1. NOTE: This also applies to viewing logs via the Monitor tab.
+
+![Regional product selection in Console](screenshots/regional-voice-products.gif)
+
+For Phone Numbers, by default, your non-US1 regions will show as "Routed to United States (US1)" for the Voice handling. To route to your newly selected region, you need to select each number, ensure the Voice handler endpoint is correct, and then click the Re-Route button. This will tell Twilio to handle all calls to that number via the Twilio Region you have selected.
+
+![Re-route phone number to another region](screenshots/regional-phone-number-reroute.gif)
+
+Refer to [Set a phone number's inbound processing Region using the Console](https://www.twilio.com/docs/global-infrastructure/inbound-processing-console) for more detail. 
+
+All of this can be scripted using the REST APIs too, but bear in mind that everything you do via the REST API needs to use a *regional URL*. See [Using the Twilio REST API in a non-US Region](https://www.twilio.com/docs/global-infrastructure/using-the-twilio-rest-api-in-a-non-us-region)
+
+e.g. `https://api.dublin.ie1.twilio.com/2010-04-01/Accounts/<AccountSid>/Queues`
+
+Refer to [Set a phone number's inbound processing Region using the REST API](https://www.twilio.com/docs/global-infrastructure/inbound-processing-api) for all the details.
+## Known Issues & Quirks
+
+* **Joining an Empty Queue in IE1 Fires an Accepted Event**
+  * When joining an empty queue in IE1, the `accepted` event is fired - which leads to the timeout countdown logic terminating. In US1, the `accepted` event is not fired until an enqueued call is bridged to the voice client call, and so the timeout countdown logic continues as expected. Functionally, this is not an issue as the calls are still successfully bridged in both regions, but it is a bit confusing.
+
+## Future Enhancements
+
+* **Transfer to Voice Queue**
+  * Basic cold transfers could be achieved by executing new `<Dial>` TwiML on the customer call SID. That might be to dial another PSTN number, a SIP address, or another Voice Queue (if transferring internally). All of these would terminate the call with the current voice client.
+
+* **Conference**
+  * For 3+ participant calls (e.g. warm transfers) - this could be done also when an enqueued call is bridged to a queued voice client (similar to what Flex/Taskrouter does upon task acceptance). i.e. execute `<Dial><Conference>` on the customer call SID first, then `<Dial>` in the voice client via a new call. 
+ 
+
 # Twilio Voice JavaScript SDK Quickstart for Node.js
 
 ![](https://github.com/TwilioDevEd/voice-javascript-sdk-quickstart-node/workflows/Node.js/badge.svg)
