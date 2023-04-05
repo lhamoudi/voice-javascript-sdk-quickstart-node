@@ -8,8 +8,10 @@
 This repo is a customization of [Twilio Voice JavaScript SDK Quickstart for Node.js](https://github.com/TwilioDevEd/voice-javascript-sdk-quickstart-node) to support the following added features:
 
 * Region Selection
-* Join/Leave Voice Queue
+* Join/Leave Voice Queue (with timeout countdown)
 * Basic IVR Menu for Queue Selection
+
+![Application usage example](screenshots/softphone-queue-call.gif)
 
 ## Custom Setup
 
